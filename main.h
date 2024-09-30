@@ -8,5 +8,5 @@
 
 int get_server_fd();
 int handle_connections(int *server_fd);
-int handle_client(int client_fd);
+int handle_client(void *fd);
 int generate_response();
