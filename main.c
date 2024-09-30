@@ -1,53 +1,76 @@
 #include "main.h"
 
-int main()
-{
-    int sock_fd = get_sock_fd();
-    if (sock_fd == -1)
-    {
+#define PORT 47563
+#define BUFFER_SIZE 1000000  // 1 MB
+
+int main() {
+    int server_fd = get_server_fd();
+    if (server_fd == -1) {
         return -1;
+    }
+
+    while (1) {
+        handle_connections(&server_fd);
     }
 
     return 0;
 }
 
-int get_sock_fd()
-{
-    int sock_fd = socket(SOCK_STREAM, AF_INET, 0);
-    if (sock_fd == -1)
-    {
-        printf("Failed to create the socket. Error: %d\n", errno);
+int get_server_fd() {
+    int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd == -1) {
+        perror("Failed to create the socket!");
         return -1;
     }
 
-    struct sockaddr_in server_addr = {
-        AF_INET,
-        8080,
-        INADDR_ANY};
-
-    if (bind(sock_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-    {
-        perror("Binding to socket to port 8080 failed!");
+    struct sockaddr_in server_addr = {AF_INET, PORT, INADDR_ANY};
+    if (bind(server_fd, (struct sockaddr *)&server_addr, (socklen_t)sizeof(server_addr)) < 0) {
+        perror("Binding the socket to the port failed!");
         return -1;
     }
 
-    if (listen(sock_fd, 10) < 0)
-    {
-        perror("Failed to listen on port 8080 failed!");
+    if (listen(server_fd, 10) < 0) {
+        perror("Failed to listen on the port!");
         return -1;
     }
 
-    return sock_fd;
+    printf("Listening on port %d...\n", PORT);
+    return server_fd;
 }
 
-int handle_client()
-{
+int handle_connections(int *server_fd) {
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_len = sizeof(client_addr);
+    int *client_fd = malloc(sizeof(int));
+    if ((*client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len)) < 0) {
+        perror("Failed to accept the connection!");
+        return -1;
+    }
 
+    printf("2\n");
+    pthread_t thread_id;
+    if (pthread_create(&thread_id, NULL, (void *)&handle_client, (void *)&client_fd) != 0) {
+        perror("Failed to create a thread to handle the connection!");
+        return -1;
+    }
+    printf("3\n");
+    if (pthread_detach(thread_id) != 0) {
+        perror("Failed to detach the client thread!");
+    }
     return 0;
 }
 
-int build_response()
-{
+int handle_client(int client_fd) {
+    printf("4\n");
+    char *buffer = (char *)malloc(BUFFER_SIZE);
 
+    if (recvfrom(client_fd, buffer, BUFFER_SIZE, 0, NULL, 0) < 0) {
+        perror("Failed to received data from the client!");
+    }
+    printf("%s", buffer);
+    return 0;
+}
+
+int generate_response() {
     return 0;
 }
