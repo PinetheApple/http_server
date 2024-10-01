@@ -7,6 +7,6 @@
 #include <sys/socket.h>
 
 int get_server_fd();
-int handle_connections(int *server_fd);
+int handle_connections(int server_fd);
 int handle_client(void *fd);
 int generate_response();

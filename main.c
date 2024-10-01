@@ -1,7 +1,7 @@
 #include "main.h"
 
 #define PORT 8080
-#define BUFFER_SIZE 1000000  // 1 MB
+#define BUFFER_SIZE 1000000
 
 int main() {
     int server_fd = get_server_fd();
@@ -10,7 +10,7 @@ int main() {
     }
 
     while (1) {
-        handle_connections(&server_fd);
+        handle_connections(server_fd);
     }
 
     return 0;
@@ -38,10 +38,10 @@ int get_server_fd() {
     return server_fd;
 }
 
-int handle_connections(int *server_fd) {
+int handle_connections(int server_fd) {
     struct sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
-    int client_fd = accept(*server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
+    int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
     if (client_fd < 0) {
         perror("Failed to accept the connection!");
         return -1;
